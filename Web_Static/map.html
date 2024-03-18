@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ShortVPN Instances list</title>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <style>
+      table, th, td { border: 1px solid black; border-collapse: collapse; }
+      td, th {padding: 10px;}
+   </style>
+  </head>
+
+  <body>
+    <h3> Create Instances: </h3> 
+    <form id="CreateForm">
+      <select id="RegionList">
+        <option>Choose a region</option>
+      </select>
+    </form> 
+    <button id="btn"> Create </button>  <div id="createstatus"></div>
+    <br><br>
+    <h3> Instances List: </h3>   <button id="list"> Refresh </button> <br>
+    <div id="container"></div>
+    <br>
+    <h3> History: </h3>
+    <div id="record"></div>
+    <script>
+
+    const CreateInsUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_Create_Instance';
+    const RegionUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_List_Region';
+    const ListUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_Return_Instances';
+    const HistoryUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_Return_History';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    var regionslist ={};
+    var userID = urlParams.get('id');        
+    var returnlist ={};
+    var returnhist={};
+    $(document).ready(function(){
+      console.log("ID:",userID);
+      retrieveRegionAPI();
+    });
+    $("#btn").click(function(){
+      createInstanceAPI();
+    });
+    $("#list").click(function(){
+      retrieveListAPI(userID);
+      retrieveRecordAPI(userID);
+    });
+    function createInstanceAPI(){
+            var apidata={};
+            apidata.ID=userID;
+            apidata.region_ID=RegionList.selectedOptions[0].value;
+            let stats = $("#createstatus");
+            stats.html("Sending submit...");
+            const xhttprC = new XMLHttpRequest();
+            xhttprC.open('POST', CreateInsUrl, true);
+            xhttprC.setRequestHeader("Content-Type", "application/json");
+            xhttprC.send(JSON.stringify(apidata));
+            xhttprC.onload = ()=> {
+              if ( (xhttprC.status === 200) || (xhttprC.status === 202) ) {
+                  const response = JSON.parse(xhttprC.response);
+                  if (response==null) return;
+                  console.log(response);
+                  stats.html("Status:"+response.status);
+              } else {
+                console.log("createInstanceAPI error:",xhttprC.status);
+                stats.html("Error:"+xhttprC.status);
+              }
+            };
+        }
+
+    function retrieveRegionAPI(){
+            const xhttprR = new XMLHttpRequest();
+            xhttprR.open('GET', RegionUrl, true);
+            xhttprR.setRequestHeader("Content-Type", "application/json");
+            xhttprR.send();
+            xhttprR.onload = ()=> {
+              if (xhttprR.status === 200) {
+                  const response = JSON.parse(xhttprR.response);
+                  if (response==null) return;
+                  regionslist=response;
+                  //console.log(regionslist);
+
+                  var select = document.getElementById("RegionList");
+
+                  for(var i = 0; i < regionslist.length; i++) {
+                      var opt = regionslist[i];
+                      var el = document.createElement("option");
+                      el.textContent = opt['city'];
+                      el.value = opt['id'];
+                      if (el.value=='sgp') {
+                        el.selected=true;
+                      }
+                      select.appendChild(el);
+                  }
+                  retrieveListAPI(userID);
+                  retrieveRecordAPI(userID);
+              } else {
+                console.log("retrieveRegionAPI error:",xhttprR.status);
+              }
+            };
+        }
+
+      function retrieveListAPI(token){
+          const xhttpr = new XMLHttpRequest();
+          var apidata={};
+          apidata.ID=token;
+          xhttpr.open('POST', ListUrl, true);
+          xhttpr.setRequestHeader("Content-Type", "application/json");
+          xhttpr.send(JSON.stringify(apidata));
+          xhttpr.onload = ()=> {
+            if (xhttpr.status === 200) {
+                let container = $("#container");
+                container.html("");
+                const response = JSON.parse(xhttpr.response);
+                if (response==null) return;
+                returnlist=response;
+                console.log(returnlist);
+                convert();
+            } else {
+              console.log("retrieveListAPI error:",xhttpr.status);
+            }
+          };
+      }
+
+      function retrieveRecordAPI(token){
+          const xhttph = new XMLHttpRequest();
+          var apidata={};
+          apidata.ID=token;
+          xhttph.open('POST', HistoryUrl, true);
+          xhttph.setRequestHeader("Content-Type", "application/json");
+          xhttph.send(JSON.stringify(apidata));
+          xhttph.onload = ()=> {
+            if (xhttph.status === 200) {
+                let record = $("#record");
+                record.html("");
+                const response = JSON.parse(xhttph.response);
+                if (response==null) return;
+                returnhist=response;
+                console.log(returnhist);
+                converthist();
+            } else {
+              console.log("retrieveRecordAPI error:",xhttph.status);
+            }
+          };
+      }
+
+      // Function to convert JSON data to HTML table
+      function convert() {
+
+        // Sample JSON data
+        var jsonData = returnlist.Instances;
+        
+        jsonData.forEach(element => {
+          if (element['Wireguard_Config']!=undefined) {
+            element['Wireguard_Config'] = atob(element['Wireguard_Config']).replace(/(?:\r\n|\r|\n)/g, '\<br\>');
+            //console.log(element['Wireguard_Config']);
+          }
+          if (element['Region']!=undefined) {
+            regionslist.forEach(region => {
+              if ( element['Region'] == region['id']) {
+                element['Region'] = region['city']
+              }
+            });
+          }
+        });
+        // Get the container element where the table will be inserted
+        let container = $("#container");
+        
+        // Create the table element
+        let table = $("<table>");
+        
+        // Get the keys (column names) of the first object in the JSON data
+        let cols = Object.keys(jsonData[0]);
+        
+        // Create the header element
+        let thead = $("<thead>");
+        let tr = $("<tr>");
+        
+        // Loop through the column names and create header cells
+        $.each(cols, function(i, item){
+            let th = $("<th>");
+            th.text(item); // Set the column name as the text of the header cell
+            tr.append(th); // Append the header cell to the header row
+        });
+        thead.append(tr); // Append the header row to the header
+        table.append(tr) // Append the header to the table
+        
+        // Loop through the JSON data and create table rows
+        $.each(jsonData, function(i, item){
+        let tr = $("<tr>");
+            
+            // Get the values of the current object in the JSON data
+            let vals = Object.values(item);
+            
+            // Loop through the values and create table cells
+            $.each(vals, (i, elem) => {
+              let td = $("<td>");
+              td.text(elem); // Set the value as the text of the table cell
+              td[0].innerHTML = td[0].innerHTML.replace(/&lt;/g , "<").replace(/&gt;/g , ">");
+              tr.append(td); // Append the table cell to the table row
+            });
+            table.append(tr); // Append the table row to the table
+        });
+        container.html(table); // Append the table to the container element
+      }
+
+      function converthist() {
+
+        // Sample JSON data
+        var jsonData = returnhist.History;
+
+        jsonData.forEach(element => {
+
+          if (element['Region']!=undefined) {
+            regionslist.forEach(region => {
+              if ( element['Region'] == region['id']) {
+                element['Region'] = region['city']
+              }
+            });
+          }
+        });
+
+        // Get the container element where the table will be inserted
+        let record = $("#record");
+
+        // Create the table element
+        let table = $("<table>");
+
+        // Get the keys (column names) of the first object in the JSON data
+        let cols = Object.keys(jsonData[0]);
+
+        // Create the header element
+        let thead = $("<thead>");
+        let tr = $("<tr>");
+
+        // Loop through the column names and create header cells
+        $.each(cols, function(i, item){
+            let th = $("<th>");
+            th.text(item); // Set the column name as the text of the header cell
+            tr.append(th); // Append the header cell to the header row
+        });
+        thead.append(tr); // Append the header row to the header
+        table.append(tr) // Append the header to the table
+
+        // Loop through the JSON data and create table rows
+        $.each(jsonData, function(i, item){
+        let tr = $("<tr>");
+            
+            // Get the values of the current object in the JSON data
+            let vals = Object.values(item);
+            
+            // Loop through the values and create table cells
+            $.each(vals, (i, elem) => {
+              let td = $("<td>");
+              td.text(elem); // Set the value as the text of the table cell
+              td[0].innerHTML = td[0].innerHTML.replace(/&lt;/g , "<").replace(/&gt;/g , ">");
+              tr.append(td); // Append the table cell to the table row
+            });
+            table.append(tr); // Append the table row to the table
+        });
+        record.html(table); // Append the table to the container element
+        }
+
+    </script> 
+  </body>
+</html>
