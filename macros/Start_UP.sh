@@ -1,4 +1,5 @@
 #!/bin/bash
+sudo systemctl stop unattended-upgrades
 sudo apt remove unattended-upgrades
 curl -s https://raw.githubusercontent.com/trailofbits/algo/master/install.sh | sudo -E bash -x
 cat /opt/algo/configs/*.*/wireguard/user1.conf > /alluser.txt
