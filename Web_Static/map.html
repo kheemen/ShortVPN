@@ -30,13 +30,13 @@
     const CreateInsUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_Create_Instance';
     const RegionUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_List_Region';
     const ListUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_Return_Instances';
-    const HistoryUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_Return_History';
+    //const HistoryUrl = 'https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_Return_History';
 
     const urlParams = new URLSearchParams(window.location.search);
     var regionslist ={};
     var userID = urlParams.get('id');        
     var returnlist ={};
-    var returnhist={};
+    //var returnhist={};
     $(document).ready(function(){
       console.log("ID:",userID);
       retrieveRegionAPI();
@@ -46,7 +46,7 @@
     });
     $("#list").click(function(){
       retrieveListAPI(userID);
-      retrieveRecordAPI(userID);
+      //retrieveRecordAPI(userID);
     });
     function createInstanceAPI(){
             var apidata={};
@@ -96,7 +96,7 @@
                       select.appendChild(el);
                   }
                   retrieveListAPI(userID);
-                  retrieveRecordAPI(userID);
+                  //retrieveRecordAPI(userID);
               } else {
                 console.log("retrieveRegionAPI error:",xhttprR.status);
               }
@@ -107,20 +107,23 @@
           const xhttpr = new XMLHttpRequest();
           var apidata={};
           apidata.ID=token;
+          let container = $("#container");
           xhttpr.open('POST', ListUrl, true);
           xhttpr.setRequestHeader("Content-Type", "application/json");
           xhttpr.send(JSON.stringify(apidata));
           xhttpr.onload = ()=> {
             if (xhttpr.status === 200) {
-                let container = $("#container");
+                
                 container.html("");
                 const response = JSON.parse(xhttpr.response);
                 if (response==null) return;
                 returnlist=response;
                 console.log(returnlist);
                 convert();
+                converthist();
             } else {
               console.log("retrieveListAPI error:",xhttpr.status);
+              container.html("error:"+xhttpr.status);
             }
           };
       }
@@ -129,12 +132,12 @@
           const xhttph = new XMLHttpRequest();
           var apidata={};
           apidata.ID=token;
+          let record = $("#record");
           xhttph.open('POST', HistoryUrl, true);
           xhttph.setRequestHeader("Content-Type", "application/json");
           xhttph.send(JSON.stringify(apidata));
           xhttph.onload = ()=> {
             if (xhttph.status === 200) {
-                let record = $("#record");
                 record.html("");
                 const response = JSON.parse(xhttph.response);
                 if (response==null) return;
@@ -143,6 +146,7 @@
                 converthist();
             } else {
               console.log("retrieveRecordAPI error:",xhttph.status);
+              record.html("error:"+xhttph.status);
             }
           };
       }
@@ -166,8 +170,14 @@
             });
           }
         });
-        // Get the container element where the table will be inserted
+
         let container = $("#container");
+
+        if (jsonData.length==0){
+          container.html("");
+          return;
+        }
+        // Get the container element where the table will be inserted
         
         // Create the table element
         let table = $("<table>");
@@ -210,7 +220,7 @@
       function converthist() {
 
         // Sample JSON data
-        var jsonData = returnhist.History;
+        var jsonData = returnlist.History;
 
         jsonData.forEach(element => {
 
@@ -223,8 +233,14 @@
           }
         });
 
-        // Get the container element where the table will be inserted
         let record = $("#record");
+
+        if (jsonData.length==0){
+          record.html("");
+          return;
+        }
+
+        // Get the container element where the table will be inserted
 
         // Create the table element
         let table = $("<table>");
