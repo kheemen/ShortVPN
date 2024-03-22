@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo systemctl stop unattended-upgrades
-sudo apt remove unattended-upgrades
+sudo apt remove unattended-upgrades -y
 curl -s https://raw.githubusercontent.com/trailofbits/algo/master/install.sh | sudo -E bash -x
 cat /opt/algo/configs/*.*/wireguard/user1.conf > /alluser.txt
 curl -X POST --header "Content-Type: text/plain" --data-binary @/alluser.txt https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_WG_Config_Retriever
