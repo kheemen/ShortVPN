@@ -5,6 +5,7 @@
     <title>ShortVPN Instances list</title>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="qrcode.js"></script>
     <style>
       table, th, td { border: 1px solid black; border-collapse: collapse; }
       td, th {padding: 10px;}
@@ -53,7 +54,7 @@
             apidata.ID=userID;
             apidata.region_ID=RegionList.selectedOptions[0].value;
             let stats = $("#createstatus");
-            stats.html("Sending submit...");
+            stats.html("Creating instance...");
             const xhttprC = new XMLHttpRequest();
             xhttprC.open('POST', CreateInsUrl, true);
             xhttprC.setRequestHeader("Content-Type", "application/json");
@@ -63,7 +64,7 @@
                   const response = JSON.parse(xhttprC.response);
                   if (response==null) return;
                   console.log(response);
-                  stats.html("Status:"+response.status);
+                  stats.html("Create Status:"+response.status);
               } else {
                 console.log("createInstanceAPI error:",xhttprC.status);
                 stats.html("Error:"+xhttprC.status);

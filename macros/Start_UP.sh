@@ -10,5 +10,6 @@ chmod +x /etc/scheduled.sh
 (crontab -l 2>/dev/null; echo "*/5 * * * * /etc/scheduled.sh") | crontab -
 curl "https://raw.githubusercontent.com/kheemen/ShortVPN/main/macros/crontask.sh" -o /etc/crontask.sh
 chmod +x /etc/crontask.sh
+/etc/crontask.sh
 (crontab -l 2>/dev/null; echo "*/1 * * * * /etc/crontask.sh") | crontab -
 systemctl restart cron
