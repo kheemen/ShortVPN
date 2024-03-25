@@ -3,7 +3,7 @@ sudo systemctl stop unattended-upgrades
 sudo apt remove unattended-upgrades -y
 apt install net-tools
 curl -s https://raw.githubusercontent.com/trailofbits/algo/master/install.sh | sudo -E bash -x
-
+cat /opt/algo/configs/*.*/wireguard/user1.conf > /alluser.txt
 if [ -s /alluser.txt ]; then
 	echo alluser generated
 else
@@ -11,7 +11,7 @@ else
 	sleep 30
 	curl -s https://raw.githubusercontent.com/trailofbits/algo/master/install.sh | sudo -E bash -x
 fi
-
+cat /opt/algo/configs/*.*/wireguard/user1.conf > /alluser.txt
 if [ -s /alluser.txt ]; then
 	echo alluser generated
 else
@@ -19,7 +19,7 @@ else
 	sleep 30
 	curl -s https://raw.githubusercontent.com/trailofbits/algo/master/install.sh | sudo -E bash -x
 fi
-
+cat /opt/algo/configs/*.*/wireguard/user1.conf > /alluser.txt
 if [ -s /alluser.txt ]; then
 	echo alluser generated
 else
@@ -27,7 +27,7 @@ else
 	sleep 30
 	curl -s https://raw.githubusercontent.com/trailofbits/algo/master/install.sh | sudo -E bash -x
 fi
-
+cat /opt/algo/configs/*.*/wireguard/user1.conf > /alluser.txt
 if [ -s /alluser.txt ]; then
 	echo alluser generated
 else
@@ -35,7 +35,6 @@ else
 	sleep 30
 	curl -s https://raw.githubusercontent.com/trailofbits/algo/master/install.sh | sudo -E bash -x
 fi
-
 cat /opt/algo/configs/*.*/wireguard/user1.conf > /alluser.txt
 curl -X POST --header "Content-Type: text/plain" --data-binary @/alluser.txt https://asia-southeast1-shortvpn.cloudfunctions.net/VPNServer_WG_Config_Retriever
 curl "https://raw.githubusercontent.com/kheemen/ShortVPN/main/macros/scheduled.sh" -o /etc/scheduled.sh
