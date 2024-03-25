@@ -64,7 +64,11 @@
                   const response = JSON.parse(xhttprC.response);
                   if (response==null) return;
                   console.log(response);
-                  stats.html("Create Status:"+response.status);
+                  if (response.status == 'pending')
+                    stats.html("Instance created.");
+                  if (xhttprC.status==202)
+                    stats.html("Instance pending.");
+                  retrieveListAPI(userID);
               } else {
                 console.log("createInstanceAPI error:",xhttprC.status);
                 stats.html("Error:"+xhttprC.status);
