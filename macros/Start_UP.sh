@@ -6,7 +6,7 @@ curl -s https://raw.githubusercontent.com/trailofbits/algo/master/install.sh | s
 cat /opt/algo/configs/*.*/wireguard/user1.conf > /alluser.txt
 
 #!/bin/bash
-for i in $(seq 1 5)
+for i in $(seq 1 10)
 do
   if [ -s /alluser.txt ]; then
 	echo "Attempt $i: alluser generated"

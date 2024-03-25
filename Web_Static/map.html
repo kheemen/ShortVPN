@@ -157,6 +157,7 @@
 
         // Sample JSON data
         var jsonData = returnlist.Instances;
+        jsonData.sort(dynamicSort("-Created"));
         
         jsonData.forEach(element => {
           if (element['Wireguard_Config']!=undefined) {
@@ -222,6 +223,7 @@
 
         // Sample JSON data
         var jsonData = returnlist.History;
+        jsonData.sort(dynamicSort("-Deleted"));
 
         jsonData.forEach(element => {
 
@@ -279,6 +281,21 @@
             table.append(tr); // Append the table row to the table
         });
         record.html(table); // Append the table to the container element
+        }
+
+        function dynamicSort(property) {
+            var sortOrder = 1;
+            if(property[0] === "-") {
+                sortOrder = -1;
+                property = property.substr(1);
+            }
+            return function (a,b) {
+                /* next line works with strings and numbers, 
+                * and you may want to customize it to your needs
+                */
+                var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+                return result * sortOrder;
+            }
         }
 
     </script> 
